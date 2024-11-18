@@ -70,15 +70,20 @@ class AIHealthAssistant:
         prompt = prompts[service_type].format(user_input=user_input)
         
         try:
-            response = self.client.messages.create(
+            # Yeni API çağrısı formatı
+            message = self.client.messages.create(
                 model="claude-3-sonnet-20240229",
-                messages=[{
-                    "role": "user",
-                    "content": prompt
-                }],
-                max_tokens=4000
+                max_tokens=4000,
+                temperature=0.7,
+                system="Sen bir sağlık danışmanısın. Verilen durumu dikkatle değerlendir ve profesyonel öneriler sun.",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
             )
-            return str(response.content)
+            return message.content
         except Exception as e:
             return f"Bir hata oluştu: {str(e)}"
 
