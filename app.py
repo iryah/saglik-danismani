@@ -12,13 +12,15 @@ class AIHealthAssistant:
         try:
             prompt = f"Sağlık danışmanı olarak şu konuda yardım et: {service_type}\nDurum: {user_input}"
             
-            # Yeni API syntax'ı
-            response = self.client.beta.completions.create(
+            # Doğru API kullanımı
+            response = self.client.messages.create(
                 model="claude-3-sonnet-20240229",
                 max_tokens=2000,
-                prompt=prompt
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
             )
-            return True, response.completion
+            return True, response.content
         except Exception as e:
             return False, str(e)
 
