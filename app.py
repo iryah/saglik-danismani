@@ -1,116 +1,101 @@
-from flask import Flask, render_template, request, jsonify
-from anthropic import Anthropic
-import os
-from datetime import datetime
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sağlık AI Asistanı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Sağlık AI Asistanı</h1>
+        
+        <div class="max-w-2xl mx-auto">
+            <div class="mb-6">
+                <label for="serviceType" class="block text-sm font-medium text-gray-700 mb-2">Hizmet Seçin</label>
+                <select id="serviceType" class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
+                    <option value="diagnosis">Hastalık Teşhis & Hastane Yönlendirme</option>
+                    <option value="psychologist">AI Psikolog Asistanı</option>
+                    <option value="aesthetic">Estetik İşlem Planlayıcı</option>
+                    <option value="vacation">Tatil Fırsat Avcısı</option>
+                    <option value="opportunity">Fırsat Analiz Motoru</option>
+                </select>
+            </div>
+            
+            <div class="mb-6">
+                <label for="userInput" class="block text-sm font-medium text-gray-700 mb-2">Durumunuzu Anlatın</label>
+                <textarea 
+                    id="userInput" 
+                    rows="5" 
+                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm"
+                    placeholder="Lütfen detaylı bilgi girin..."></textarea>
+            </div>
+            
+            <button 
+                onclick="generateResponse()" 
+                class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition-colors">
+                Analiz Et
+            </button>
+            
+            <div id="loading" class="hidden mt-8 text-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="mt-2 text-gray-600">Analiz yapılıyor...</p>
+            </div>
+            
+            <div id="response" class="hidden mt-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Sonuç</h2>
+                    <div id="responseContent" class="prose prose-blue max-w-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-app = Flask(__name__)
+    <script>
+    async function generateResponse() {
+        const loading = document.getElementById('loading');
+        const responseDiv = document.getElementById('response');
+        const responseContent = document.getElementById('responseContent');
+        const serviceType = document.getElementById('serviceType').value;
+        const userInput = document.getElementById('userInput').value;
 
-class AIHealthAssistant:
-    def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-    
-    def generate_response(self, service_type, user_input):
-        prompts = {
-            'diagnosis': """
-            Aşağıdaki semptomlar için bir ön değerlendirme yap ve hastane önerisi sun:
-            Semptomlar: {user_input}
-            
-            Lütfen şu formatta yanıt ver:
-            # ÖN DEĞERLENDİRME
-            # ÖNERİLEN HASTANELER
-            # ACİLİYET DURUMU
-            # ÖNERİLER
-            """,
-            
-            'psychologist': """
-            Aşağıdaki durumla ilgili psikolojik değerlendirme ve öneriler sun:
-            Durum: {user_input}
-            
-            Lütfen şu formatta yanıt ver:
-            # DURUM ANALİZİ
-            # ÖNERİLER
-            # İLERİ DEĞERLENDİRME GEREKLİLİĞİ
-            # DESTEK KAYNAKLARI
-            """,
-            
-            'aesthetic': """
-            Aşağıdaki estetik prosedür talebi için değerlendirme ve hastane önerisi sun:
-            Talep: {user_input}
-            
-            Lütfen şu formatta yanıt ver:
-            # PROSEDÜR DETAYI
-            # ÖNERİLEN HASTANELER
-            # TAHMİNİ MALİYET ARALIĞI
-            # DİKKAT EDİLMESİ GEREKENLER
-            """,
-            
-            'vacation': """
-            Aşağıdaki kriterlere göre sağlık turizmi ve tatil önerisi sun:
-            Kriterler: {user_input}
-            
-            Lütfen şu formatta yanıt ver:
-            # ÖNERİLEN DESTINASYONLAR
-            # SAĞLIK HİZMETLERİ
-            # KONAKLAMA ÖNERİLERİ
-            # TAHMİNİ BÜTÇE
-            """,
-            
-            'opportunity': """
-            Aşağıdaki alan için fırsat analizi yap:
-            Alan: {user_input}
-            
-            Lütfen şu formatta yanıt ver:
-            # MEVCUT FIRSATLAR
-            # MALİYET ANALİZİ
-            # RİSK DEĞERLENDİRMESİ
-            # ÖNERİLER
-            """
+        if (!userInput.trim()) {
+            alert('Lütfen durumunuzu anlatın');
+            return;
         }
-        
-        prompt = prompts[service_type].format(user_input=user_input)
-        
-        try:
-            # Yeni API çağrısı formatı
-            message = self.client.messages.create(
-                model="claude-3-sonnet-20240229",
-                max_tokens=4000,
-                temperature=0.7,
-                system="Sen bir sağlık danışmanısın. Verilen durumu dikkatle değerlendir ve profesyonel öneriler sun.",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            )
-            return message.content
-        except Exception as e:
-            return f"Bir hata oluştu: {str(e)}"
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+        // UI'ı hazırla
+        loading.classList.remove('hidden');
+        responseDiv.classList.add('hidden');
+        responseContent.textContent = '';
 
-@app.route('/api/service', methods=['POST'])
-def process_service():
-    data = request.json
-    assistant = AIHealthAssistant()
-    
-    service_type = data.get('service_type')
-    user_input = data.get('input')
-    
-    if not service_type or not user_input:
-        return jsonify({
-            'success': False,
-            'error': 'Eksik parametre'
-        })
-    
-    response = assistant.generate_response(service_type, user_input)
-    
-    return jsonify({
-        'success': True,
-        'response': response
-    })
+        try {
+            const response = await fetch('/api/service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    service_type: serviceType,
+                    input: userInput
+                })
+            });
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+            const data = await response.json();
+
+            if (data.success) {
+                responseContent.textContent = data.response;
+                responseDiv.classList.remove('hidden');
+            } else {
+                alert('Üzgünüm, bir hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Bir bağlantı hatası oluştu. Lütfen tekrar deneyin.');
+        } finally {
+            loading.classList.add('hidden');
+        }
+    }
+    </script>
+</body>
+</html>
