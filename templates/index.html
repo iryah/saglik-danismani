@@ -41,6 +41,8 @@
         const responseDiv = document.getElementById('response');
         const responseContent = document.getElementById('responseContent');
         
+        responseDiv.classList.add('hidden');
+        
         if (!userInput.trim()) {
             alert('Lütfen bilgi girin');
             return;
@@ -50,7 +52,8 @@
             const response = await fetch('/api/service', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     service_type: serviceType,
@@ -67,7 +70,8 @@
                 alert('Bir hata oluştu: ' + data.error);
             }
         } catch (error) {
-            alert('Bir hata oluştu: ' + error);
+            console.error('Error:', error);
+            alert('Bir hata oluştu, lütfen tekrar deneyin');
         }
     }
     </script>
