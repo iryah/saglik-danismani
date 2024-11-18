@@ -10,13 +10,13 @@ class AIHealthAssistant:
     
     def generate_response(self, service_type, user_input):
         try:
-            prompt = f"\n\nHuman: Sağlık danışmanı olarak şu konuda yardım et: {service_type}\nDurum: {user_input}\n\nAssistant:"
+            prompt = f"Sağlık danışmanı olarak şu konuda yardım et: {service_type}\nDurum: {user_input}"
             
-            response = self.client.completion(
-                prompt=prompt,
+            # Yeni API syntax'ı
+            response = self.client.beta.completions.create(
                 model="claude-3-sonnet-20240229",
-                max_tokens_to_sample=2000,
-                temperature=0.7
+                max_tokens=2000,
+                prompt=prompt
             )
             return True, response.completion
         except Exception as e:
