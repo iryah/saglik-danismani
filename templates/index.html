@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sağlık AI Asistanı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Sağlık AI Asistanı</h1>
+        
+        <div class="max-w-2xl mx-auto">
+            <select id="serviceType" class="w-full p-2 mb-4 border rounded">
+                <option value="diagnosis">Hastalık Teşhis & Hastane Yönlendirme</option>
+                <option value="psychologist">AI Psikolog Asistanı</option>
+                <option value="aesthetic">Estetik İşlem Planlayıcı</option>
+                <option value="vacation">Tatil Fırsat Avcısı</option>
+                <option value="opportunity">Fırsat Analiz Motoru</option>
+            </select>
+            
+            <textarea id="userInput" class="w-full p-2 mb-4 border rounded" rows="5" 
+                      placeholder="Lütfen detaylı bilgi girin..."></textarea>
+            
+            <button onclick="generateResponse()" 
+                    class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                Analiz Et
+            </button>
+            
+            <div id="response" class="mt-8 p-4 bg-white rounded shadow-lg hidden">
+                <h2 class="text-xl font-bold mb-4">Sonuç</h2>
+                <div id="responseContent" class="whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function generateResponse() {
+        const serviceType = document.getElementById('serviceType').value;
+        const userInput = document.getElementById('userInput').value;
+        const responseDiv = document.getElementById('response');
+        const responseContent = document.getElementById('responseContent');
+        
+        if (!userInput.trim()) {
+            alert('Lütfen bilgi girin');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    service_type: serviceType,
+                    input: userInput
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                responseDiv.classList.remove('hidden');
+                responseContent.textContent = data.response;
+            } else {
+                alert('Bir hata oluştu: ' + data.error);
+            }
+        } catch (error) {
+            alert('Bir hata oluştu: ' + error);
+        }
+    }
+    </script>
+</body>
+</html>
