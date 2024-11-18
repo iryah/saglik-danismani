@@ -5,47 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sağlık AI Asistanı</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Loading animasyonu için -->
+    <style>
+        .loading-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8">Sağlık AI Asistanı</h1>
-        
-        <div class="max-w-2xl mx-auto">
-            <div class="mb-6">
-                <label for="serviceType" class="block text-sm font-medium text-gray-700 mb-2">Hizmet Seçin</label>
-                <select id="serviceType" class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
-                    <option value="diagnosis">Hastalık Teşhis & Hastane Yönlendirme</option>
-                    <option value="psychologist">AI Psikolog Asistanı</option>
-                    <option value="aesthetic">Estetik İşlem Planlayıcı</option>
-                    <option value="vacation">Tatil Fırsat Avcısı</option>
-                    <option value="opportunity">Fırsat Analiz Motoru</option>
-                </select>
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Sağlık AI Asistanı</h1>
+            <p class="text-gray-600">Yapay zeka destekli sağlık danışmanınız</p>
+        </header>
+
+        <!-- Ana İçerik -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Form Kartı -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <!-- Hizmet Seçimi -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Hizmet Seçin
+                    </label>
+                    <select id="serviceType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="diagnosis">🏥 Hastalık Teşhis & Hastane Yönlendirme</option>
+                        <option value="psychologist">🧠 AI Psikolog Asistanı</option>
+                        <option value="aesthetic">✨ Estetik İşlem Planlayıcı</option>
+                        <option value="vacation">🌍 Sağlık Turizmi Danışmanı</option>
+                        <option value="opportunity">📈 Sağlık Sektörü Fırsat Analizi</option>
+                    </select>
+                </div>
+
+                <!-- Durum Açıklaması -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Durumunuzu Anlatın
+                    </label>
+                    <textarea 
+                        id="userInput" 
+                        rows="5" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Lütfen durumunuzu detaylı bir şekilde anlatın..."></textarea>
+                </div>
+
+                <!-- Gönder Butonu -->
+                <button 
+                    onclick="generateResponse()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                    Analiz Et
+                </button>
             </div>
-            
-            <div class="mb-6">
-                <label for="userInput" class="block text-sm font-medium text-gray-700 mb-2">Durumunuzu Anlatın</label>
-                <textarea 
-                    id="userInput" 
-                    rows="5" 
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm"
-                    placeholder="Lütfen detaylı bilgi girin..."></textarea>
+
+            <!-- Yükleniyor -->
+            <div id="loading" class="hidden">
+                <div class="flex flex-col items-center justify-center p-8">
+                    <div class="loading-pulse">
+                        <svg class="animate-spin h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <p class="mt-4 text-gray-600">AI asistanınız yanıtı hazırlıyor...</p>
+                </div>
             </div>
-            
-            <button 
-                onclick="generateResponse()" 
-                class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition-colors">
-                Analiz Et
-            </button>
-            
-            <div id="loading" class="hidden mt-8 text-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p class="mt-2 text-gray-600">Analiz yapılıyor...</p>
-            </div>
-            
-            <div id="response" class="hidden mt-8">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-xl font-bold mb-4">Sonuç</h2>
-                    <div id="responseContent" class="prose prose-blue max-w-none"></div>
+
+            <!-- Sonuç -->
+            <div id="response" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Analiz Sonucu</h2>
+                    <div class="prose max-w-none">
+                        <div id="responseContent" class="text-gray-600 whitespace-pre-wrap"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -64,12 +100,13 @@
             return;
         }
 
-        // UI'ı hazırla
-        loading.classList.remove('hidden');
-        responseDiv.classList.add('hidden');
-        responseContent.textContent = '';
-
         try {
+            // UI güncelle
+            loading.classList.remove('hidden');
+            responseDiv.classList.add('hidden');
+            responseContent.textContent = '';
+
+            // API isteği
             const response = await fetch('/api/service', {
                 method: 'POST',
                 headers: {
@@ -83,18 +120,26 @@
 
             const data = await response.json();
 
+            // Yanıtı göster
             if (data.success) {
-                responseContent.textContent = data.response;
+                responseContent.innerHTML = formatResponse(data.response);
                 responseDiv.classList.remove('hidden');
             } else {
-                alert('Üzgünüm, bir hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+                throw new Error(data.error || 'Bir hata oluştu');
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Bir bağlantı hatası oluştu. Lütfen tekrar deneyin.');
+            alert(`Üzgünüm, bir hata oluştu: ${error.message}`);
         } finally {
             loading.classList.add('hidden');
         }
+    }
+
+    function formatResponse(text) {
+        // Markdown benzeri formatlamayı HTML'e çevir
+        return text
+            .replace(/# (.*)/g, '<h3 class="text-xl font-bold text-gray-800 mt-6 mb-3">$1</h3>')
+            .replace(/\* (.*)/g, '<li class="ml-6 mb-2">$1</li>')
+            .replace(/\[(.*?)\]/g, '<span class="text-gray-600">$1</span>');
     }
     </script>
 </body>
